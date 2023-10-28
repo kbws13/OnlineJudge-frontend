@@ -105,20 +105,26 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, Ref, ref } from "vue";
+import { onMounted, reactive, Ref, ref } from "vue";
 import MdEditor from "@/components/MdEditor.vue";
 import { QuestionControllerService } from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
+import { useRoute } from "vue-router";
+import { dayjs } from "@arco-design/web-vue/es/_utils/date";
 
-const form = reactive({
-  tags: ["我", "简单"],
-  title: "A + B",
+const route = useRoute();
+// 如果路由包含update，是为更新页面
+const updatePage = route.path.includes("update");
+
+let form = ref({
+  tags: [],
+  title: "",
   answer: "",
   content: "",
   judgeCase: [
     {
-      input: "1 2",
-      output: "3 4",
+      input: "",
+      output: "",
     },
   ],
   judgeConfig: {
@@ -127,12 +133,55 @@ const form = reactive({
     timeLimit: 1000,
   },
 });
+const loadData = async () => {
+  const id = route.query.id;
+  if (!id) {
+    return;
+  }
+  const res = await QuestionControllerService.getQuestionByIdUsingGet(
+    id as any
+  );
+  if (res.code === 0) {
+    form.value = res.data as any;
+    // json 转 js 对象
+    if (!form.value.judgeCase) {
+      form.value.judgeCase = [
+        {
+          input: "",
+          output: "",
+        },
+      ];
+    } else {
+      form.value.judgeCase = JSON.parse(form.value.judgeCase as any);
+    }
+    if (!form.value.judgeConfig) {
+      form.value.judgeConfig = {
+        memoryLimit: 1000,
+        stackLimit: 1000,
+        timeLimit: 1000,
+      };
+    } else {
+      form.value.judgeConfig = JSON.parse(form.value.judgeConfig as any);
+    }
+    if (!form.value.tags) {
+      form.value.tags = [];
+    } else {
+      form.value.tags = JSON.parse(form.value.tags as any);
+    }
+  } else {
+    message.error("加载失败," + res.message);
+  }
+};
+
+onMounted(() => {
+  loadData();
+});
 
 /**
  * 新增判题用例
  */
 const handleAdd = () => {
-  form.judgeCase.push({
+  form.value.judgeCase.push({
     input: "",
     output: "",
   });
@@ -141,25 +190,38 @@ const handleAdd = () => {
  * 删除判题用例
  */
 const handleDelete = (index: number) => {
-  form.judgeCase.splice(index, 1);
+  form.value.judgeCase.splice(index, 1);
 };
 
 const doSubmit = async () => {
-  console.log(form);
-  const res = await QuestionControllerService.addQuestionUsingPost(form);
-  if (res.code === 0) {
-    message.success("创建成功");
+  console.log(form.value);
+  if (updatePage) {
+    const res = await QuestionControllerService.updateQuestionUsingPost(
+      form.value
+    );
+    if (res.code === 0) {
+      message.success("更新成功");
+    } else {
+      message.error("更新失败," + res.message);
+    }
   } else {
-    message.error("创建失败," + res.message);
+    const res = await QuestionControllerService.addQuestionUsingPost(
+      form.value
+    );
+    if (res.code === 0) {
+      message.success("创建成功");
+    } else {
+      message.error("创建失败," + res.message);
+    }
   }
 };
 
 const onContentChange = (value: string) => {
-  form.content = value;
+  form.value.content = value;
 };
 
 const onAnswerChange = (value: string) => {
-  form.answer = value;
+  form.value.answer = value;
 };
 </script>
 
