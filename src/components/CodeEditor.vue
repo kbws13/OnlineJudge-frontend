@@ -1,37 +1,55 @@
 <template>
-  <div id="code-editor" ref="codeEditorRef" style="min-height: 400px" />
-  <a-button @click="fillValue">填充值</a-button>
+  <div
+    id="code-editor"
+    ref="codeEditorRef"
+    style="min-height: 480px; height: 40vh"
+  />
 </template>
 <script lang="ts" setup>
 import * as monaco from "monaco-editor";
-import { defineProps, onMounted, ref, toRaw, withDefaults } from "vue";
+import { defineProps, onMounted, ref, toRaw, watch, withDefaults } from "vue";
 
 /**
  * 定义组件属性类型
  */
 interface Prop {
   value: string;
+  language?: string;
   handleChange: (v: string) => void;
 }
 
 const codeEditorRef = ref();
 const codeEditor = ref();
 
-const fillValue = () => {
-  if (!codeEditor.value) {
-    return;
-  }
-  // 改变值
-  toRaw(codeEditor.value).setValue("新的值");
-};
-
 // 给组件定义初始值
 const props = withDefaults(defineProps<Prop>(), {
   value: () => "",
+  language: () => "java",
   handleChange: (v: string) => {
     console.log(v);
   },
 });
+
+watch(
+  () => props.language,
+  () => {
+    codeEditor.value = monaco.editor.create(codeEditorRef.value, {
+      value: props.value,
+      language: props.language,
+      automaticLayout: true,
+      lineNumbers: "on",
+      colorDecorators: true,
+      minimap: {
+        enabled: false,
+      },
+      // roundedSelection: false,
+      // scrollBeyondLastLine: false,
+      readOnly: false,
+      // theme: "vs",
+      theme: "vs-dark",
+    });
+  }
+);
 
 onMounted(() => {
   if (!codeEditorRef.value) {
@@ -39,17 +57,18 @@ onMounted(() => {
   }
   codeEditor.value = monaco.editor.create(codeEditorRef.value, {
     value: props.value,
-    language: "java",
+    language: props.language,
     automaticLayout: true,
     lineNumbers: "on",
     colorDecorators: true,
     minimap: {
-      enabled: true,
+      enabled: false,
     },
     // roundedSelection: false,
     // scrollBeyondLastLine: false,
     readOnly: false,
-    theme: "vs",
+    // theme: "vs",
+    theme: "vs-dark",
   });
   // 监听内容变化
   codeEditor.value.onDidChangeModelContent(() => {
