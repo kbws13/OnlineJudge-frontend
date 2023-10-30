@@ -3,7 +3,7 @@
     <a-layout style="min-height: 100vh">
       <a-layout-header class="header">
         <a-space>
-          <img src="../assets/oj-logo.png" class="logo" />
+          <img class="logo" src="../assets/oj-logo.png" />
           <div>Online Judge</div>
         </a-space>
       </a-layout-header>
@@ -47,4 +47,4 @@
   text-align: center;
 }
 </style>
-<script setup lang="ts"></script>
+<script lang="ts" setup></script>

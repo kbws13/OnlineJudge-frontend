@@ -2,9 +2,9 @@
   <div id="code-editor" ref="codeEditorRef" style="min-height: 400px" />
   <a-button @click="fillValue">填充值</a-button>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as monaco from "monaco-editor";
-import { onMounted, ref, toRaw, withDefaults, defineProps } from "vue";
+import { defineProps, onMounted, ref, toRaw, withDefaults } from "vue";
 
 /**
  * 定义组件属性类型
