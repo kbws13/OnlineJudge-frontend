@@ -35,7 +35,7 @@ watch(
   () => {
     if (codeEditor.value) {
       monaco.editor.setModelLanguage(
-        toRaw(codeEditor.value).getMode(),
+        toRaw(codeEditor.value).getModel(),
         props.language
       );
     }
