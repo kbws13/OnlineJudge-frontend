@@ -6,16 +6,16 @@
           <a-tab-pane key="question" title="题目">
             <a-card v-if="question" :title="question.title">
               <a-descriptions
-                title="判题条件"
                 :column="{ xs: 1, md: 2, lg: 3 }"
+                title="判题条件"
               >
-                <a-descriptions-item label="时间限制">
+                <a-descriptions-item label="时间限制（ms）：">
                   {{ question.judgeConfig.timeLimit ?? 0 }}
                 </a-descriptions-item>
-                <a-descriptions-item label="内存限制">
+                <a-descriptions-item label="内存限制（KB）：">
                   {{ question.judgeConfig.memoryLimit ?? 0 }}
                 </a-descriptions-item>
-                <a-descriptions-item label="堆栈限制">
+                <a-descriptions-item label="堆栈限制（KB）：">
                   {{ question.judgeConfig.stackLimit ?? 0 }}
                 </a-descriptions-item>
               </a-descriptions>
@@ -25,39 +25,43 @@
                   <a-tag
                     v-for="(tag, index) of question.tags"
                     :key="index"
-                    color="blue"
-                  >
-                    {{ tag }}
+                    color="green"
+                    >{{ tag }}
                   </a-tag>
                 </a-space>
               </template>
             </a-card>
           </a-tab-pane>
-          <a-tab-pane key="comment" title="评论"> 评论区</a-tab-pane>
-          <a-tab-pane key="answer" title="题解"> 答案</a-tab-pane>
+          <a-tab-pane key="comment" disabled title="评论"> 评论区</a-tab-pane>
+          <a-tab-pane key="answer" title="答案"> 提交后方可查看答案</a-tab-pane>
         </a-tabs>
       </a-col>
       <a-col :md="12" :xs="24">
         <a-form :model="form" layout="inline">
-          <a-form-item field="title" label="编程语言" style="min-width: 240px">
-            <a-select
-              v-model="form.language"
-              :style="{ width: '320px' }"
-              placeholder="选择编程语言"
-            >
+          <a-form-item
+            field="language"
+            label="编程语言"
+            style="min-width: 240px"
+          >
+            <a-select v-model="form.language" placeholder="选择编程语言">
               <a-option>java</a-option>
-              <a-option>cpp</a-option>
-              <a-option>go</a-option>
+              <a-option disabled>敬请其他更多语言</a-option>
             </a-select>
           </a-form-item>
         </a-form>
         <CodeEditor
-          :value="form.code as string"
-          :language="form.language"
           :handle-change="changeCode"
+          :language="form.language"
+          :value="form.code as string"
         />
         <a-divider size="0" />
-        <a-button type="primary" style="min-width: 200px" @click="doSubmit">
+        <a-button
+          shape="round"
+          size="large"
+          style="min-width: 200px; margin-left: 280px"
+          type="primary"
+          @click="doSubmit"
+        >
           提交代码
         </a-button>
       </a-col>
@@ -66,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, withDefaults, defineProps } from "vue";
+import { defineProps, onMounted, ref, withDefaults } from "vue";
 import {
   QuestionControllerService,
   QuestionSubmitAddRequest,
@@ -80,6 +84,9 @@ interface Props {
   id: string;
 }
 
+/**
+ * 获取到动态路由 id
+ */
 const props = withDefaults(defineProps<Props>(), {
   id: () => "",
 });
@@ -97,6 +104,19 @@ const loadData = async () => {
 };
 
 /**
+ * 不同语言的默认程序
+ */
+const codeDefaultValue = ref(
+  "public class Main {\n" +
+    "    public static void main(String[] args) {\n" +
+    "        int a = Integer.parseInt(args[0]);\n" +
+    "        int b = Integer.parseInt(args[1]);\n" +
+    "        System.out.println(a + b);\n" +
+    "    }\n" +
+    "}\n"
+);
+
+/**
  * 页面加载时，请求数据
  */
 onMounted(() => {
@@ -105,7 +125,7 @@ onMounted(() => {
 
 const form = ref<QuestionSubmitAddRequest>({
   language: "java",
-  code: "",
+  code: codeDefaultValue as unknown as string,
 });
 
 /**
@@ -127,6 +147,13 @@ const doSubmit = async () => {
   }
 };
 
+/**
+ * 页面加载时，请求数据
+ */
+onMounted(() => {
+  loadData();
+});
+
 const changeCode = (value: string) => {
   form.value.code = value;
 };
@@ -134,11 +161,13 @@ const changeCode = (value: string) => {
 
 <style>
 #viewQuestionsView {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
+  box-shadow: 0px 0px 10px rgba(35, 7, 7, 0.21);
+  border-radius: 10px;
 }
 
-#viewQuestionsView .arco-space-horizontal .arco-space-item {
+#viewQuestionView .arco-space-horizontal .arco-space-item {
   margin-bottom: 0 !important;
 }
 </style>

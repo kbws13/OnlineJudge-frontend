@@ -1,28 +1,79 @@
 <template>
   <div id="addQuestionView">
-    <h2>创建题目</h2>
-    <a-form :model="form">
-      <a-form-item field="title" label="标题">
-        <a-input v-model="form.title" placeholder="请输入标题" />
-      </a-form-item>
-      <a-form-item field="tags" label="标签">
-        <a-input-tag
-          v-model="form.tags"
-          allow-clear
-          placeholder="请输入标标签"
+    <div
+      style="
+        font-size: 32px;
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 16px;
+      "
+    >
+      <template v-if="route.path.startsWith('/question/update')">
+        修改题目信息
+      </template>
+      <template v-else>创建题目</template>
+    </div>
+    <a-form
+      :model="form"
+      label-align="left"
+      size="medium"
+      style="font-weight: bold; margin: 0 auto"
+    >
+      <a-form-item
+        :rules="[{ required: true, message: '题目是必填的' }]"
+        field="title"
+        label="题目:"
+        required
+        tooltip="建议填写题目"
+      >
+        <a-input
+          v-model="form.title"
+          placeholder="请输入标题"
+          style="max-width: 500px"
         />
       </a-form-item>
-
-      <a-form-item field="content" label="题目内容">
+      <a-form-item
+        field="tags"
+        label="题目标签："
+        required
+        tooltip="建议填写题目标签"
+      >
+        <a-input-tag
+          v-model="form.tags"
+          placeholder="请选择标签"
+          style="max-width: 500px"
+        />
+      </a-form-item>
+      <a-form-item
+        field="content"
+        label="题目内容："
+        required
+        tooltip="建议填写题目内容"
+      >
         <MdEditor :handle-change="onContentChange" :value="form.content" />
       </a-form-item>
-      <a-form-item field="answer" label="答案">
+      <a-form-item
+        field="answer"
+        label="题目答案："
+        required
+        tooltip="建议填写题目答案"
+      >
         <MdEditor :handle-change="onAnswerChange" :value="form.answer" />
       </a-form-item>
-
-      <a-form-item :content-flex="false" :merge-props="false" label="判题配置">
-        <a-space direction="vertical" style="min-width: 480px">
-          <a-form-item field="judgeConfig.timeLimit" label="时间限制">
+      <a-divider :margin="10" />
+      <a-form-item
+        :content-flex="false"
+        :merge-props="false"
+        label="判题配置："
+        required
+        tooltip="建议填写判题配置"
+      >
+        <a-space direction="vertical" style="min-width: 500px">
+          <a-form-item
+            field="judgeConfig.timeLimit"
+            label="时间限制："
+            tooltip="单位：ms（毫秒）"
+          >
             <a-input-number
               v-model="form.judgeConfig.timeLimit"
               min="0"
@@ -31,16 +82,11 @@
               size="large"
             />
           </a-form-item>
-          <a-form-item field="judgeConfig.stackLimit" label="堆栈限制">
-            <a-input-number
-              v-model="form.judgeConfig.stackLimit"
-              min="0"
-              mode="button"
-              placeholder="请输入堆栈限制"
-              size="large"
-            />
-          </a-form-item>
-          <a-form-item field="judgeConfig.memoryLimit" label="内存限制">
+          <a-form-item
+            field="judgeConfig.memoryLimit"
+            label="内存限制："
+            tooltip="单位：kb"
+          >
             <a-input-number
               v-model="form.judgeConfig.memoryLimit"
               min="0"
@@ -49,24 +95,40 @@
               size="large"
             />
           </a-form-item>
+          <a-form-item
+            field="judgeConfig.stackLimit"
+            label="堆栈限制："
+            tooltip="单位：kb"
+          >
+            <a-input-number
+              v-model="form.judgeConfig.stackLimit"
+              min="0"
+              mode="button"
+              placeholder="请输入堆栈限制"
+              size="large"
+            />
+          </a-form-item>
         </a-space>
       </a-form-item>
+      <a-divider :margin="10" />
       <a-form-item
         :content-flex="false"
         :merge-props="false"
-        label="测试用例配置"
+        label="测试用例配置："
+        required
+        tooltip="建议填写测试用例配置"
       >
         <a-form-item
           v-for="(judgeCaseItem, index) of form.judgeCase"
           :key="index"
-          :label="`Post-${index}`"
           no-style
         >
-          <a-space direction="vertical" style="min-width: 480px">
+          <a-space direction="vertical" style="min-width: 650px">
             <a-form-item
               :key="index"
               :field="`form.judgeCase[${index}].input`"
-              :label="`输入用例-${index}`"
+              :label="`第${index}个输入用例:`"
+              tooltip="主要的输入用例"
             >
               <a-input
                 v-model="judgeCaseItem.input"
@@ -76,27 +138,43 @@
             <a-form-item
               :key="index"
               :field="`form.judgeCase[${index}].output`"
-              :label="`输出用例-${index}`"
+              :label="`第${index}个输出用例:`"
+              tooltip="主要的输出用例"
             >
               <a-input
                 v-model="judgeCaseItem.output"
                 placeholder="请输入测试输出用例"
               />
             </a-form-item>
-            <a-button status="danger" @click="handleDelete(index)"
-              >删除
+          </a-space>
+          <a-space direction="vertical" size="large">
+            <a-button
+              shape="round"
+              status="danger"
+              type="outline"
+              @click="handleDelete(index)"
+            >
+              删除用例
             </a-button>
           </a-space>
         </a-form-item>
-        <div style="margin-top: 32px">
-          <a-button status="success" type="outline" @click="handleAdd"
+        <div style="margin-top: 5px">
+          <a-button
+            shape="round"
+            status="success"
+            type="outline"
+            @click="handleAdd"
             >新增测试用例
           </a-button>
         </div>
       </a-form-item>
-      <div style="margin-top: 16px" />
+      <a-divider :margin="10" />
       <a-form-item>
-        <a-button style="min-width: 200px" type="primary" @click="doSubmit"
+        <a-button
+          shape="round"
+          style="min-width: 150px; margin: 0 150px"
+          type="primary"
+          @click="doSubmit"
           >提交
         </a-button>
       </a-form-item>
@@ -106,32 +184,36 @@
 
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
-import MdEditor from "@/components/MdEditor.vue";
 import { QuestionControllerService } from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
+const router = useRouter();
 const route = useRoute();
 // 如果路由包含update，是为更新页面
 const updatePage = route.path.includes("update");
 
 let form = ref({
-  tags: [],
   title: "",
+  tags: [],
   answer: "",
   content: "",
+  judgeConfig: {
+    memoryLimit: 1000,
+    stackLimit: 1000,
+    timeLimit: 1000,
+  },
   judgeCase: [
     {
       input: "",
       output: "",
     },
   ],
-  judgeConfig: {
-    memoryLimit: 1000,
-    stackLimit: 1000,
-    timeLimit: 1000,
-  },
 });
+
+/**
+ * 根据题目 id 获取旧数据
+ */
 const loadData = async () => {
   const id = route.query.id;
   if (!id) {
@@ -192,14 +274,23 @@ const handleDelete = (index: number) => {
   form.value.judgeCase.splice(index, 1);
 };
 
+/**
+ * 提交
+ */
 const doSubmit = async () => {
   console.log(form.value);
+  // 区分更新还是创建
   if (updatePage) {
     const res = await QuestionControllerService.updateQuestionUsingPost(
       form.value
     );
     if (res.code === 0) {
+      // 更新成功则返回到管理界面
       message.success("更新成功");
+      await router.push({
+        path: "/question/manage",
+        replace: true,
+      });
     } else {
       message.error("更新失败," + res.message);
     }
@@ -209,6 +300,12 @@ const doSubmit = async () => {
     );
     if (res.code === 0) {
       message.success("创建成功");
+      // 添加成功后清空
+      form.value.answer = "";
+      form.value.tags = [];
+      form.value.judgeCase = [];
+      form.value.content = "";
+      form.value.title = "";
     } else {
       message.error("创建失败," + res.message);
     }
@@ -226,5 +323,19 @@ const onAnswerChange = (value: string) => {
 
 <style scoped>
 #addQuestionView {
+  margin: 0 auto;
+  padding: 10px;
+  max-width: 1000px;
+  background: linear-gradient(to right, #efefef, #fff, #efefef);
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(35, 7, 7, 0.21);
+}
+
+.arco-form-item-label-col-left {
+  justify-content: flex-end;
+}
+
+:deep(.bytemd-fullscreen.bytemd) {
+  z-index: 100;
 }
 </style>

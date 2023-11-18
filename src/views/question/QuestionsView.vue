@@ -1,42 +1,61 @@
 <template>
   <div id="questionsView">
-    <a-form :model="searchParams" layout="inline">
-      <a-form-item field="title" label="名称" style="min-width: 240px">
+    <a-form :model="searchParams" layout="inline" style="margin-left: 300px">
+      <a-form-item field="title" label="名称" tooltip="请输入搜索的题目">
         <a-input v-model="searchParams.title" placeholder="请输入题目名称" />
       </a-form-item>
-      <a-form-item field="tags" label="标签" style="min-width: 280px">
-        <a-input-tag v-model="searchParams.tags" placeholder="请输入标签" />
+      <a-form-item
+        field="tags"
+        label="题目标签："
+        style="min-width: 280px"
+        tooltip="请输入搜索题目标签"
+      >
+        <a-input-tag v-model="searchParams.tags" placeholder="请输入题目标签" />
       </a-form-item>
       <a-form-item>
-        <a-button type="primary" @click="doSubmit">搜索</a-button>
+        <a-button shape="round" status="normal" type="outline" @click="doSubmit"
+          >搜索
+        </a-button>
       </a-form-item>
     </a-form>
     <a-divider size="0" />
     <a-table
+      :ref="tableRef"
       :columns="columns"
       :data="dataList"
       :pagination="{
+        showTotal: true,
         pageSize: searchParams.pageSize,
         current: searchParams.current,
         total,
-        showTotal: true,
+        showJumper: true,
+        showPageSize: true,
       }"
+      column-resizable
+      wrapper
+      @pageSizeChange="onPageSizeChange"
       @page-change="onPageChange"
     >
       <template #tags="{ record }">
         <a-space wrap>
-          <a-tag v-for="(tag, index) of record.tags" :key="index" color="blue">
-            {{ tag }}
+          <a-tag
+            v-for="(tag, index) of record.tags"
+            :key="index"
+            color="green"
+            size="medium"
+            >{{ tag }}
           </a-tag>
         </a-space>
       </template>
       <template #acceptedRate="{ record }">
         {{
           `${
-            record.submitNum > 0
-              ? (record.acceptedNum / record.submitNum) * 100
-              : "0"
-          } % (${record.acceptedNum}/${record.submitNum})`
+            Math.round(
+              (record.submitNum > 0
+                ? (record.acceptedNum / record.submitNum) * 100
+                : "0" * 100) * 100
+            ) / 100
+          }% (${record.acceptedNum}/${record.submitNum})`
         }}
       </template>
       <template #createTime="{ record }">
@@ -44,7 +63,12 @@
       </template>
       <template #optional="{ record }">
         <a-space>
-          <a-button type="primary" @click="toQuestionPage(record)">
+          <a-button
+            shape="round"
+            status="normal"
+            type="primary"
+            @click="toQuestionPage(record)"
+          >
             做题
           </a-button>
         </a-space>
@@ -64,6 +88,8 @@ import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 import moment from "moment";
 
+const tableRef = ref();
+
 const dataList = ref([]);
 const total = ref(0);
 const searchParams = ref<QuestionQueryRequest>({
@@ -74,9 +100,11 @@ const searchParams = ref<QuestionQueryRequest>({
 });
 
 const loadData = async () => {
-  const res = await QuestionControllerService.listQuestionVoByPageUsingPost(
-    searchParams.value
-  );
+  const res = await QuestionControllerService.listQuestionVoByPageUsingPost({
+    ...searchParams.value,
+    sortField: "createTime",
+    sortOrder: "descend",
+  });
   if (res.code === 0) {
     dataList.value = res.data.records;
     total.value = res.data.total;
@@ -102,25 +130,35 @@ const columns = [
   {
     title: "题号",
     dataIndex: "id",
+    align: "center",
   },
   {
-    title: "题目名称",
+    title: "题目",
     dataIndex: "title",
+    align: "center",
   },
   {
     title: "标签",
     slotName: "tags",
+    align: "center",
   },
   {
     title: "通过率",
     slotName: "acceptedRate",
+    align: "center",
   },
   {
     title: "创建时间",
     slotName: "createTime",
+    align: "center",
+    sortable: {
+      sortDirections: ["ascend"],
+    },
   },
   {
+    title: "操作",
     slotName: "optional",
+    align: "center",
   },
 ];
 
@@ -132,12 +170,23 @@ const onPageChange = (page: number) => {
 };
 
 /**
+ * 分页大小
+ * @param size
+ */
+const onPageSizeChange = (size: number) => {
+  searchParams.value = {
+    ...searchParams.value,
+    pageSize: size,
+  };
+};
+
+/**
  * 跳转到做题页面
  */
 const router = useRouter();
 const toQuestionPage = (question: Question) => {
   router.push({
-    path: `/view/question/${question.id}`,
+    path: `/question/view/${question.id}`,
   });
 };
 
@@ -149,7 +198,6 @@ const doSubmit = () => {
     ...searchParams.value,
     current: 1,
   };
-  // loadData();
 };
 </script>
 
@@ -157,5 +205,6 @@ const doSubmit = () => {
 #questionsView {
   max-width: 1280px;
   margin: 0 auto;
+  border-radius: 10px;
 }
 </style>

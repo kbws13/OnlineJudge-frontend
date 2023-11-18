@@ -2,6 +2,7 @@ import router from "@/router";
 import store from "@/store";
 import ACCESS_ENUM from "@/access/accessEnum";
 import checkAccess from "@/access/checkAccess";
+import message from "@arco-design/web-vue/es/message";
 
 router.beforeEach(async (to, from, next) => {
   let loginUser = store.state.user.loginUser;
@@ -21,6 +22,7 @@ router.beforeEach(async (to, from, next) => {
       !loginUser.userRole ||
       loginUser.userRole === ACCESS_ENUM.NOT_LOGIN
     ) {
+      message.warning("请登录!");
       next(`/user/login?redirect=${to.fullPath}`);
       return;
     }

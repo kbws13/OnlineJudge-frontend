@@ -1,28 +1,62 @@
 <template>
   <div id="userLoginView">
-    <h2 style="margin-bottom: 16px">用户登录</h2>
+    <h1 style="margin: 32px 0">登录</h1>
     <a-form
       :model="form"
       auto-label-width
       label-align="left"
-      style="max-width: 480px; margin: 0 auto"
-      @submit="handleSubmit"
+      style="max-width: 320px; margin: 0 auto"
     >
-      <a-form-item field="userAccount" label="用户账号">
+      <a-form-item
+        field="userAccount"
+        label="账号"
+        required
+        tooltip="账号不少于 4 位"
+      >
         <a-input v-model="form.userAccount" placeholder="请输入账号" />
       </a-form-item>
-      <a-form-item field="userPassword" label="密码" tooltip="密码需要 8 位">
+      <a-form-item
+        field="userPassword"
+        label="密码"
+        required
+        tooltip="密码不少于 8 位"
+      >
         <a-input-password
           v-model="form.userPassword"
           placeholder="请输入密码"
         />
       </a-form-item>
-      <a-form-item>
-        <a-button html-type="submit" style="width: 120px" type="primary"
-          >登录
-        </a-button>
-      </a-form-item>
     </a-form>
+    <a-space wrap>
+      <a-button
+        shape="round"
+        size="large"
+        status="success"
+        type="secondary"
+        @click="toIndex"
+      >
+        首 页
+      </a-button>
+      <a-button
+        html-type="submit"
+        shape="round"
+        size="large"
+        style="width: 120px; margin: 16px"
+        type="primary"
+        @click="handleSubmit"
+      >
+        登 录
+      </a-button>
+      <a-button
+        shape="round"
+        size="large"
+        status="success"
+        type="outline"
+        @click="toRegister"
+      >
+        注 册
+      </a-button>
+    </a-space>
   </div>
 </template>
 
@@ -60,5 +94,20 @@ const handleSubmit = async () => {
   } else {
     message.error("登录失败," + res.message);
   }
+};
+/**
+ * 回到首页
+ * @param question
+ */
+const toIndex = () => {
+  router.push({
+    path: `/`,
+  });
+};
+
+const toRegister = () => {
+  router.push({
+    path: `/user/register`,
+  });
 };
 </script>

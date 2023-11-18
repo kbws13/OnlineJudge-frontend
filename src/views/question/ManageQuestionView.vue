@@ -1,31 +1,119 @@
 <template>
   <div id="manageQuestionView">
-    <a-form :model="searchParams" layout="inline">
-      <a-form-item field="title" label="名称">
+    <a-form
+      :model="searchParams"
+      layout="inline"
+      style="justify-content: center; align-content: center; margin: 25px"
+    >
+      <a-form-item field="title" label="名称" tooltip="请输入搜索的题目">
         <a-input v-model="searchParams.title" placeholder="请输入题目名称" />
       </a-form-item>
-      <a-form-item field="tags" label="标签">
-        <a-input-tag v-model="searchParams.tags" placeholder="请输入标签" />
+      <a-form-item field="title" label="用户：" tooltip="请输入用户的id">
+        <a-input v-model="searchParams.userId" placeholder="请输入搜索用户" />
+      </a-form-item>
+      <a-form-item
+        field="tags"
+        label="题目标签："
+        style="min-width: 280px"
+        tooltip="请输入搜索题目标签"
+      >
+        <a-input-tag v-model="searchParams.tags" placeholder="请输入题目标签" />
       </a-form-item>
       <a-form-item>
-        <a-button @click="doSubmit">搜索</a-button>
+        <a-button shape="round" status="normal" type="outline" @click="doSubmit"
+          >搜索
+        </a-button>
       </a-form-item>
     </a-form>
     <a-table
+      :ref="tableRef"
+      :column-resizable="true"
       :columns="columns"
       :data="dataList"
       :pagination="{
+        showTotal: true,
         pageSize: searchParams.pageSize,
         current: searchParams.current,
         total,
-        showTotal: true,
+        showJumper: true,
+        showPageSize: true,
       }"
+      @pageSizeChange="onPageSizeChange"
       @page-change="onPageChange"
     >
+      <template #id="{ record }">
+        <a-link
+          status="normal"
+          style="color: blue"
+          @click="toQuestionPage(record.id)"
+          >{{ record.id }}
+        </a-link>
+      </template>
+      <template #tags="{ record }">
+        <a-space wrap>
+          <a-tag
+            v-for="(tag, index) of JSON.parse(record.tags)"
+            :key="index"
+            color="cyan"
+            >{{ tag }}
+          </a-tag>
+        </a-space>
+      </template>
+      <template #judgeConfig="{ record }">
+        <a-space wrap>
+          <a-tag
+            v-for="(config, index) of JSON.parse(record.judgeConfig)"
+            :key="index"
+            color="orangered"
+            >{{
+              `${
+                index === "timeLimit"
+                  ? "时间(ms)"
+                  : index === "memoryLimit"
+                  ? "内存(Kb)"
+                  : "堆栈(Kb)"
+              }`
+            }}
+            {{ "：" + config }}
+          </a-tag>
+        </a-space>
+      </template>
+      <template #judgeCase="{ record }">
+        <a-space wrap>
+          <a-tag
+            v-for="(config, index) of JSON.parse(record.judgeCase)"
+            :key="index"
+            color="blue"
+            >示例{{ index + 1 }}: 输入：{{ config.input }} ，输出：{{
+              config.output
+            }}
+          </a-tag>
+        </a-space>
+      </template>
+      <template #createTime="{ record }">
+        {{ moment(record.createTime).format("YYYY-MM-DD") }}
+      </template>
       <template #optional="{ record }">
         <a-space>
-          <a-button type="primary" @click="doUpdate(record)"> 修改</a-button>
-          <a-button status="danger" @click="doDelete(record)"> 删除</a-button>
+          <a-button shape="round" type="outline" @click="doUpdate(record)"
+            >修改
+          </a-button>
+          <a-popconfirm
+            cancelText="否"
+            content="确定要删除此题目吗?"
+            okText="是"
+            type="error"
+            @cancel="
+              () => {
+                console.log(`已取消`);
+              }
+            "
+            @ok="doDelete(record)"
+          >
+            <a-button shape="round" status="danger" type="outline"
+              >删除
+            </a-button>
+          </a-popconfirm>
         </a-space>
       </template>
     </a-table>
@@ -33,33 +121,40 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive, ref, watchEffect } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import {
   Question,
   QuestionControllerService,
-  QuestionQueryRequest,
+  QuestionSubmitQueryRequest,
 } from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
+import moment from "moment/moment";
+
+const tableRef = ref();
 
 const dataList = ref([]);
 const total = ref(0);
-const searchParams = ref<QuestionQueryRequest>({
-  title: "",
+const searchParams = ref({
+  userId: undefined,
   tags: [],
+  title: "",
   pageSize: 10,
   current: 1,
+  content: "",
 });
 
 const loadData = async () => {
-  const res = await QuestionControllerService.listQuestionByPageUsingPost(
-    searchParams.value
-  );
+  const res = await QuestionControllerService.listQuestionByPageUsingPost({
+    ...searchParams.value,
+    sortField: "createTime",
+    sortOrder: "descend",
+  });
   if (res.code === 0) {
     dataList.value = res.data.records;
     total.value = res.data.total;
   } else {
-    message.error("加载失败," + res.message);
+    message.error("加载失败，" + res.message);
   }
 };
 /**
@@ -78,25 +173,38 @@ onMounted(() => {
 
 const columns = [
   {
-    title: "id",
-    dataIndex: "id",
+    title: "题号",
+    slotName: "id",
+    align: "center",
   },
   {
-    title: "标题",
+    title: "创建者",
+    dataIndex: "userId",
+    align: "center",
+  },
+  {
+    title: "题目",
     dataIndex: "title",
+    align: "center",
   },
-  {
-    title: "内容",
-    dataIndex: "content",
-  },
+  // {
+  //   title: "内容",
+  //   dataIndex: "content",
+  //   align: "center",
+  //   width: 250,
+  // },
   {
     title: "标签",
-    dataIndex: "tags",
+    slotName: "tags",
+    align: "center",
+    width: 150,
   },
-  {
-    title: "答案",
-    dataIndex: "answer",
-  },
+  // {
+  //   title: "答案",
+  //   dataIndex: "answer",
+  //   align: "center",
+  //   width: 150,
+  // },
   {
     title: "提交数",
     dataIndex: "submitNum",
@@ -106,27 +214,34 @@ const columns = [
     dataIndex: "acceptedNum",
   },
   {
-    title: "判题配置",
-    dataIndex: "judgeConfig",
+    title: "题目要求",
+    slotName: "judgeConfig",
+    align: "center",
+    width: 130,
   },
   {
     title: "判题用例",
-    dataIndex: "judgeCase",
-  },
-  {
-    title: "用户id",
-    dataIndex: "userId",
+    slotName: "judgeCase",
+    align: "center",
+    width: 120,
   },
   {
     title: "创建时间",
-    dataIndex: "createTime",
+    slotName: "createTime",
+    align: "center",
+    width: 110,
   },
   {
     title: "操作",
     slotName: "optional",
+    align: "center",
   },
 ];
 
+/**
+ * 分页
+ * @param page
+ */
 const onPageChange = (page: number) => {
   searchParams.value = {
     ...searchParams.value,
@@ -134,6 +249,21 @@ const onPageChange = (page: number) => {
   };
 };
 
+/**
+ * 分页大小
+ * @param size
+ */
+const onPageSizeChange = (size: number) => {
+  searchParams.value = {
+    ...searchParams.value,
+    pageSize: size,
+  };
+};
+
+/**
+ * 删除
+ * @param question
+ */
 const doDelete = async (question: Question) => {
   const res = await QuestionControllerService.deleteQuestionUsingPost({
     id: question.id,
@@ -147,25 +277,47 @@ const doDelete = async (question: Question) => {
   }
 };
 const router = useRouter();
+
+/**
+ * 跳转到做题页面
+ * @param question
+ */
+const toQuestionPage = (questionId: number) => {
+  console.log(questionId);
+  router.push({
+    path: `/question/view/${questionId}`,
+  });
+};
+
+/**
+ * 修改 / 更新操作
+ * @param question
+ */
 const doUpdate = (question: Question) => {
   router.push({
-    path: "/update/question",
+    path: "/question/update",
     query: {
       id: question.id,
     },
   });
 };
 
+/**
+ * 确认搜索，重新加载数据
+ */
 const doSubmit = () => {
+  // 这里需要重置搜索页号
   searchParams.value = {
     ...searchParams.value,
     current: 1,
   };
-  // loadData();
 };
 </script>
 
 <style scoped>
 #manageQuestionView {
+  padding: 5px;
+  box-shadow: 0px 0px 10px rgba(35, 7, 7, 0.21);
+  border-radius: 10px;
 }
 </style>
