@@ -8,7 +8,7 @@
         />
       </a-form-item>
       <a-form-item field="language" label="编程语言：" style="min-width: 240px">
-        <a-select v-model="searchParams.language" placeholder="选择编程语言">
+        <a-select v-model="searchParams.submitLanguage" placeholder="选择编程语言">
           <a-option>java</a-option>
           <a-option>cpp</a-option>
           <a-option>csharp</a-option>
@@ -94,14 +94,13 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, watchEffect } from "vue";
-import {
-  Question,
-  QuestionControllerService,
-  QuestionSubmitQueryRequest,
-} from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 import moment from "moment";
+import {
+  QuestionControllerService,
+  QuestionSubmitQueryRequest,
+} from "../../../backend/question";
 
 const tableRef = ref();
 const dataList = ref([]);
@@ -109,7 +108,7 @@ const total = ref(0);
 // 搜索请求
 const searchParams = ref<QuestionSubmitQueryRequest>({
   questionId: undefined,
-  language: undefined,
+  submitLanguage: undefined,
   pageSize: 10,
   current: 1,
 });

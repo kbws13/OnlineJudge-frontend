@@ -3,9 +3,9 @@
     <a-layout style="min-height: 100vh">
       <a-layout-header class="header">
         <a-space>
-          <img class="logo" src="../assets/oj-logo.png" />
+          <img class="logo" src="../assets/oj-logo.png" alt="logo" />
           <div style="margin-left: 15px; font-size: 25px; font-weight: bold">
-            在线判题系统
+            K-OJ 在线判题系统
           </div>
         </a-space>
       </a-layout-header>

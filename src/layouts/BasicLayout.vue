@@ -16,7 +16,7 @@
       <a-layout-footer class="footer">
         <a href="http://kbws.xyz" target="_blank"> Online Judge by KBWS </a>
         <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">
-          桂ICP备2023002099号
+          冀ICP备2022027806号-1
         </a>
       </a-layout-footer>
     </a-layout>

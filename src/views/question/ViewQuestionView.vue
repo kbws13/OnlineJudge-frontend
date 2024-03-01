@@ -43,16 +43,17 @@
             label="编程语言"
             style="min-width: 240px"
           >
-            <a-select v-model="form.language" placeholder="选择编程语言">
+            <a-select v-model="form.submitLanguage" placeholder="选择编程语言">
               <a-option>java</a-option>
+              <a-option>python3</a-option>
               <a-option disabled>敬请其他更多语言</a-option>
             </a-select>
           </a-form-item>
         </a-form>
         <CodeEditor
           :handle-change="changeCode"
-          :language="form.language"
-          :value="form.code as string"
+          :language="form.submitLanguage"
+          :value="form.submitCode as string"
         />
         <a-divider size="0" />
         <a-button
@@ -71,14 +72,14 @@
 
 <script lang="ts" setup>
 import { defineProps, onMounted, ref, withDefaults } from "vue";
+import message from "@arco-design/web-vue/es/message";
+import CodeEditor from "@/components/CodeEditor.vue";
+import MdViewer from "@/components/MdViewer.vue";
 import {
   QuestionControllerService,
   QuestionSubmitAddRequest,
   QuestionVO,
-} from "../../../generated";
-import message from "@arco-design/web-vue/es/message";
-import CodeEditor from "@/components/CodeEditor.vue";
-import MdViewer from "@/components/MdViewer.vue";
+} from "../../../backend/question";
 
 interface Props {
   id: string;
@@ -124,8 +125,8 @@ onMounted(() => {
 });
 
 const form = ref<QuestionSubmitAddRequest>({
-  language: "java",
-  code: codeDefaultValue as unknown as string,
+  submitLanguage: "java",
+  submitCode: codeDefaultValue as unknown as string,
 });
 
 /**
@@ -155,7 +156,7 @@ onMounted(() => {
 });
 
 const changeCode = (value: string) => {
-  form.value.code = value;
+  form.value.submitCode = value;
 };
 </script>
 

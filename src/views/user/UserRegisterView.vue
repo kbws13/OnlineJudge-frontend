@@ -1,6 +1,6 @@
 <template>
   <div id="userLoginView">
-    <h1 style="margin: 32px 0">新手上线 猫 OJ 判题系统</h1>
+    <h1 style="margin: 32px 0">注册</h1>
     <a-form
       :model="form"
       auto-label-width
@@ -72,11 +72,14 @@
 
 <script lang="ts" setup>
 import { reactive } from "vue";
-import { UserControllerService, UserRegisterRequest } from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { Message } from "@arco-design/web-vue";
+import {
+  UserControllerService,
+  UserRegisterRequest,
+} from "../../../backend/user";
 
 const router = useRouter();
 const store = useStore();

@@ -28,7 +28,7 @@
       >
         <a-input
           v-model="form.title"
-          placeholder="请输入标题"
+          placeholder="请输入题目"
           style="max-width: 500px"
         />
       </a-form-item>
@@ -184,9 +184,10 @@
 
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
-import { QuestionControllerService } from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
 import { useRoute, useRouter } from "vue-router";
+import MdEditor from "@/components/MdEditor.vue";
+import { QuestionControllerService } from "../../../backend/question";
 
 const router = useRouter();
 const route = useRoute();

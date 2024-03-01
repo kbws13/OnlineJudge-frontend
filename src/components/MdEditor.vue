@@ -1,6 +1,6 @@
 <template>
   <Editor
-    :local="local"
+    :local="locale"
     :mode="mode"
     :plugins="plugins"
     :value="value"
@@ -11,6 +11,7 @@
 import gfm from "@bytemd/plugin-gfm";
 import { Editor } from "@bytemd/vue-next";
 import { defineProps, withDefaults } from "vue";
+import locale from "bytemd/locales/zh_Hans.json";
 import gemoji from "@bytemd/plugin-gemoji";
 import math from "@bytemd/plugin-math";
 import mathLocale from "@bytemd/plugin-math/locales/zh_Hans.json";
@@ -50,7 +51,6 @@ const props = withDefaults(defineProps<Props>(), {
 });
 </script>
 <style>
-// 去掉 Github 图标
 .bytemd-toolbar-icon.bytemd-tippy.bytemd-tippy-right:last-child {
   display: none;
 }

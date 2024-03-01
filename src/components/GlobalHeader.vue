@@ -1,25 +1,27 @@
 <template>
   <a-row id="globalHeader" :wrap="false" align="center">
     <a-col flex="auto">
-      <a-menu
-        :selected-keys="selectedKeys"
-        mode="horizontal"
-        @menu-item-click="doMenuClick"
-      >
-        <a-menu-item
-          key="0"
-          :style="{ padding: 0, marginRight: '38px' }"
-          disabled
+      <div>
+        <a-menu
+          :selected-keys="selectedKeys"
+          mode="horizontal"
+          @menu-item-click="doMenuClick"
         >
-          <div class="title-bar">
-            <img class="logo" src="../assets/oj-logo.png" />
-            <div class="title">Online Judge</div>
-          </div>
-        </a-menu-item>
-        <a-menu-item v-for="item in visibleRoutes" :key="item.path">
-          {{ item.name }}
-        </a-menu-item>
-      </a-menu>
+          <a-menu-item
+            key="0"
+            :style="{ padding: 0, marginRight: '38px' }"
+            disabled
+          >
+            <div class="title-bar">
+              <img alt="logo" class="logo" src="../assets/oj-logo.png" />
+              <div class="title">K-OJ</div>
+            </div>
+          </a-menu-item>
+          <a-menu-item v-for="item in visibleRoutes" :key="item.path">
+            {{ item.name }}
+          </a-menu-item>
+        </a-menu>
+      </div>
     </a-col>
     <a-space size="large">
       <a-dropdown trigger="hover">
@@ -27,14 +29,12 @@
           v-if="loginUser && loginUser.userRole !== ACCESS_ENUM.NOT_LOGIN"
         >
           <template v-if="loginUser.userAvatar">
-            <div>欢迎，来访者</div>
             <a-avatar
               :image-url="loginUser.userAvatar"
               shape="circle"
             ></a-avatar>
           </template>
           <template v-else>
-            <div>欢迎，{{ loginUser.userName }}</div>
             <a-avatar shape="circle">
               <IconUser />
             </a-avatar>
@@ -89,13 +89,13 @@
 </template>
 
 <script lang="ts" setup>
-import { routes } from "../router/routes";
+import { routes } from "@/router/routes";
 import { useRouter } from "vue-router";
 import { computed, ref } from "vue";
 import { useStore } from "vuex";
 import checkAccess from "@/access/checkAccess";
 import ACCESS_ENUM from "@/access/accessEnum";
-import { LoginUserVO, UserControllerService } from "../../generated";
+import { LoginUserVO, UserControllerService } from "../../backend/user";
 
 const router = useRouter();
 // 获取存储用户信息
@@ -113,12 +113,10 @@ const visibleRoutes = computed(() => {
       return false;
     }
     // 通过权限过滤菜单
-    if (
-      !checkAccess(store.state.user.loginUser, item?.meta?.access as string)
-    ) {
-      return false;
-    }
-    return true;
+    return checkAccess(
+      store.state.user.loginUser,
+      item?.meta?.access as string
+    );
   });
 });
 

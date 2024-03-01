@@ -166,15 +166,12 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, watchEffect } from "vue";
-import {
-  FileControllerService,
-  User,
-  UserControllerService,
-} from "../../../generated/index";
 import message from "@arco-design/web-vue/es/message";
 import moment from "moment";
 import { useRouter } from "vue-router";
 import { FileItem, Message } from "@arco-design/web-vue";
+import { User, UserControllerService } from "../../../backend/user";
+import { Service } from "../../../backend/file";
 
 const router = useRouter();
 const tableRef = ref();
@@ -355,15 +352,13 @@ let userAvatarImg = userInfo.value?.userAvatar;
  * 上传头像
  */
 const uploadAvatar = async () => {
-  // const res = await FileControllerService.uploadOssFileUsingPost(
-  //   file?.value.file
-  // );
-  // if (res.code === 0) {
-  //   userAvatarImg = res.data;
-  //   Message.success("上传成功，点击确认即可修改头像");
-  // } else {
-  //   Message.error("上传失败！" + res.data);
-  // }
+  const res = await Service.uploadCosFileUsingPost(file?.value.file);
+  if (res.code === 0) {
+    userAvatarImg = res.data;
+    Message.success("上传成功，点击确认即可修改头像");
+  } else {
+    Message.error("上传失败！" + res.data);
+  }
 };
 
 /**

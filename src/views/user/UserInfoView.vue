@@ -51,18 +51,18 @@
         <a-form-item field="用户名称" label="账号 :">
           <a-input v-model="updateForm.userName" placeholder="请输入用户名称" />
         </a-form-item>
-        <!--        <a-form-item field="邮箱" label="邮箱 :">-->
-        <!--          <a-input v-model="updateForm.email" placeholder="请输入邮箱" />-->
-        <!--        </a-form-item>-->
-        <!--        <a-form-item field="电话" label="电话 :">-->
-        <!--          <a-input v-model="updateForm.phone" placeholder="请输入电话号码" />-->
-        <!--        </a-form-item>-->
-        <!--        <a-form-item field="userProfile" label="简介 :">-->
-        <!--          <a-textarea-->
-        <!--            v-model="updateForm.userProfile"-->
-        <!--            placeholder="请输入简介"-->
-        <!--          />-->
-        <!--        </a-form-item>-->
+        <a-form-item field="邮箱" label="邮箱 :">
+          <a-input v-model="updateForm.email" placeholder="请输入邮箱" />
+        </a-form-item>
+        <a-form-item field="电话" label="电话 :">
+          <a-input v-model="updateForm.phone" placeholder="请输入电话号码" />
+        </a-form-item>
+        <a-form-item field="userProfile" label="简介 :">
+          <a-textarea
+            v-model="updateForm.userProfile"
+            placeholder="请输入简介"
+          />
+        </a-form-item>
       </a-form>
     </a-modal>
     <div>
@@ -89,11 +89,15 @@
 </template>
 <script lang="ts" setup>
 import { useStore } from "vuex";
-import { UserControllerService, UserUpdateMyRequest } from "../../../generated";
 import { ref } from "vue";
 import { FileItem, Message } from "@arco-design/web-vue";
 import { useRouter } from "vue-router";
 import moment from "moment";
+import {
+  UserControllerService,
+  UserUpdateMyRequest,
+} from "../../../backend/user";
+import { Service } from "../../../backend/file";
 
 const router = useRouter();
 const file = ref();
@@ -155,15 +159,13 @@ let userAvatarImg = updateForm.value.userAvatar;
  * 上传头像
  */
 const uploadAvatar = async () => {
-  // const res = await FileControllerService.uploadOssFileUsingPost(
-  //   file?.value.file
-  // );
-  // if (res.code === 0) {
-  //   userAvatarImg = res.data;
-  //   Message.success("上传成功，点击确认即可修改头像");
-  // } else {
-  //   Message.error("上传失败！" + res.data);
-  // }
+  const res = await Service.uploadCosFileUsingPost(file?.value.file);
+  if (res.code === 0) {
+    userAvatarImg = res.data;
+    Message.success("上传成功，点击确认即可修改头像");
+  } else {
+    Message.error("上传失败！" + res.data);
+  }
 };
 /**
  * 打开弹窗
