@@ -80,6 +80,7 @@ import {
   QuestionSubmitAddRequest,
   QuestionVO,
 } from "../../../backend/question";
+import func from "vue-temp/vue-editor-bridge";
 
 interface Props {
   id: string;
@@ -137,14 +138,29 @@ const doSubmit = async () => {
     return;
   }
 
-  const res = await QuestionControllerService.doQuestionSubmitUsingPost({
-    ...form.value,
-    questionId: question.value.id,
-  });
-  if (res.code === 0) {
-    message.success("提交成功");
-  } else {
-    message.error("提交失败," + res.message);
+  // const res = await QuestionControllerService.doQuestionSubmitUsingPost({
+  //   ...form.value,
+  //   questionId: question.value.id,
+  // });
+  // if (res.code === 0) {
+  //   message.success("提交成功");
+  // } else {
+  //   message.error("提交失败," + res.message);
+  // }
+  // 创建 SSE 请求
+  const eventSource = new EventSource(
+    `http://localhost:8101/api/question/question_submit/do?questionId=${question.value.id}&language=${form.value.submitLanguage}&code=${form.value.submitLanguage}`
+  )
+  // 接收消息
+  eventSource.onmessage = function (event) {
+    message.info(event.data)
+  }
+  // 报错或连接关闭时触发
+  eventSource.onerror = function (event) {
+    if(event.eventPhase === EventSource.CLOSED) {
+      console.log("关闭连接");
+      eventSource.close();
+    }
   }
 };
 

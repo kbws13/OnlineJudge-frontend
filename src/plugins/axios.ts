@@ -4,8 +4,8 @@ import { OpenAPI } from "../../backend/user";
 OpenAPI.WITH_CREDENTIALS = true;
 const baseUrl =
   process.env.NODE_ENV === "development"
-    ? "http://test.kbws.xyz"
-    : "http://test.kbws.xyz";
+    ? "http://ojbackend.kbws.xyz"
+    : "http://ojbackend.kbws.xyz";
 
 OpenAPI.BASE = baseUrl;
 console.log("当前环境：", process.env.NODE_ENV, "请求地址：", baseUrl);
@@ -25,7 +25,6 @@ axios.interceptors.request.use(
   (config) => {
     // 假设token存在localStorage中
     const token = localStorage.getItem("token");
-    console.log("token:", token);
     if (token) {
       config.headers.Authorization = token;
     }
