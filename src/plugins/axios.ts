@@ -4,7 +4,7 @@ import { OpenAPI } from "../../backend/user";
 OpenAPI.WITH_CREDENTIALS = true;
 const baseUrl =
   process.env.NODE_ENV === "development"
-    ? "http://ojbackend.kbws.xyz"
+    ? "http://localhost:8101"
     : "http://ojbackend.kbws.xyz";
 
 OpenAPI.BASE = baseUrl;
@@ -38,7 +38,6 @@ axios.interceptors.request.use(
 // 添加响应拦截器
 axios.interceptors.response.use(
   function (response) {
-    console.log("全局响应", response);
     return response;
   },
   function (error) {

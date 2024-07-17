@@ -10,13 +10,13 @@
                 title="判题条件"
               >
                 <a-descriptions-item label="时间限制（ms）：">
-                  {{ question.judgeConfig.timeLimit ?? 0 }}
+                  {{ question.judgeConfig?.timeLimit ?? 0 }}
                 </a-descriptions-item>
                 <a-descriptions-item label="内存限制（KB）：">
-                  {{ question.judgeConfig.memoryLimit ?? 0 }}
+                  {{ question.judgeConfig?.memoryLimit ?? 0 }}
                 </a-descriptions-item>
                 <a-descriptions-item label="堆栈限制（KB）：">
-                  {{ question.judgeConfig.stackLimit ?? 0 }}
+                  {{ question.judgeConfig?.stackLimit ?? 0 }}
                 </a-descriptions-item>
               </a-descriptions>
               <MdViewer :value="question.content || ''" />
@@ -80,7 +80,8 @@ import {
   QuestionSubmitAddRequest,
   QuestionVO,
 } from "../../../backend/question";
-import func from "vue-temp/vue-editor-bridge";
+import { useStore } from "vuex";
+import { LoginUserVO } from "backend/user";
 
 interface Props {
   id: string;
@@ -92,6 +93,9 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   id: () => "",
 });
+
+// 获取存储用户信息
+const store = useStore();
 
 const question = ref<QuestionVO>();
 const loadData = async () => {
@@ -138,29 +142,14 @@ const doSubmit = async () => {
     return;
   }
 
-  // const res = await QuestionControllerService.doQuestionSubmitUsingPost({
-  //   ...form.value,
-  //   questionId: question.value.id,
-  // });
-  // if (res.code === 0) {
-  //   message.success("提交成功");
-  // } else {
-  //   message.error("提交失败," + res.message);
-  // }
-  // 创建 SSE 请求
-  const eventSource = new EventSource(
-    `http://localhost:8101/api/question/question_submit/do?questionId=${question.value.id}&language=${form.value.submitLanguage}&code=${form.value.submitLanguage}`
-  )
-  // 接收消息
-  eventSource.onmessage = function (event) {
-    message.info(event.data)
-  }
-  // 报错或连接关闭时触发
-  eventSource.onerror = function (event) {
-    if(event.eventPhase === EventSource.CLOSED) {
-      console.log("关闭连接");
-      eventSource.close();
-    }
+  const res = await QuestionControllerService.doQuestionSubmitUsingPost({
+    ...form.value,
+    questionId: question.value.id,
+  });
+  if (res.code === 0) {
+    message.success("提交成功");
+  } else {
+     message.error("提交失败," + res.message);
   }
 };
 
@@ -169,6 +158,24 @@ const doSubmit = async () => {
  */
 onMounted(() => {
   loadData();
+  // 获取登录用户信息
+  const loginUser: LoginUserVO = store.state.user?.loginUser as LoginUserVO;
+
+  // 创建 SSE 请求
+  const eventSource = new EventSource(
+   `http://localhost:8101/api/question/sse/connect/${loginUser.id}`
+  )
+  // 接收消息
+  eventSource.onmessage = function (event) {
+   message.info(event.data)
+  }
+  // 报错或连接关闭时触发
+  eventSource.onerror = function (event) {
+   if(event.eventPhase === EventSource.CLOSED) {
+     console.log("关闭连接");
+     eventSource.close();
+   }
+  }
 });
 
 const changeCode = (value: string) => {
