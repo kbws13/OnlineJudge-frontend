@@ -163,7 +163,8 @@ onMounted(() => {
 
   // 创建 SSE 请求
   const eventSource = new EventSource(
-   `http://localhost:8101/api/question/sse/connect/${loginUser.id}`
+  //  `http://localhost:8101/api/question/sse/connect/${loginUser.id}`
+    `http://ojbackend.kbws.xyz/api/question/sse/connect/${loginUser.id}`
   )
   // 接收消息
   eventSource.onmessage = function (event) {
