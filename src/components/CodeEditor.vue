@@ -2,7 +2,7 @@
   <div
     id="code-editor"
     ref="codeEditorRef"
-    style="min-height: 200px; height: 100vh"
+    style="min-height: 20rem;"
   />
 </template>
 <script lang="ts" setup>
@@ -55,7 +55,7 @@ onMounted(() => {
     showFoldingControls: "always", // 是否一直显示折叠 always | mouseover
     disableLayerHinting: true, // 等宽优化
     minimap: {
-      enabled: true,
+      enabled: false,
       size: "fill",
       maxColumn: 50,
     }, // 开启小地图
@@ -65,7 +65,7 @@ onMounted(() => {
     codeLens: false, // 代码镜头
     scrollBeyondLastLine: false, // 滚动完最后一行后再滚动一屏幕
     colorDecorators: true, // 颜色装饰器
-    accessibilitySupport: "off", // 辅助功能支持  "auto" | "off" | "on"
+    accessibilitySupport: "on", // 辅助功能支持  "auto" | "off" | "on"
     lineNumbers: "on", // 行号 取值： "on" | "off" | "relative" | "interval" | function
     lineNumbersMinChars: 1, // 行号最小字符   number
     readOnly: false,

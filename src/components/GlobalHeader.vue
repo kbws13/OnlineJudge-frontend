@@ -23,8 +23,8 @@
         </a-menu>
       </div>
     </a-col>
-    <a-space size="large">
-      <a-dropdown trigger="hover">
+    <a-col flex="100px">
+      <!-- <a-dropdown trigger="hover">
         <template
           v-if="loginUser && loginUser.userRole !== ACCESS_ENUM.NOT_LOGIN"
         >
@@ -83,8 +83,18 @@
             </a-doption>
           </template>
         </template>
-      </a-dropdown>
-    </a-space>
+      </a-dropdown> -->
+      <!-- 未登录状态 -->
+      <a-link v-if="!loginUser.id" @click="gologin">未登录</a-link>
+      <!-- 已登录状态 -->
+      <a-popover v-else trigger="click" position="bottom">
+        <!-- 没名称用户 -->
+        <a-link>{{ loginUser.userName ?? "无名"  }}</a-link>
+        <template #content>
+          <p class="logout" @click="logout">退出登录</p>
+        </template>
+      </a-popover>
+    </a-col>
   </a-row>
 </template>
 
@@ -126,6 +136,12 @@ const logout = () => {
   location.reload();
 };
 
+const gologin = () => {
+  router.push({
+    path: "/user/login",
+  });
+};
+
 // 默认主页
 const selectedKeys = ref(["/"]);
 
@@ -144,10 +160,14 @@ setTimeout(() => {
     userName: "KBWS",
     userRole: ACCESS_ENUM.ADMIN,
   });
-}, 3000);
+}, 1000);
 </script>
 
 <style scoped>
+.logout {
+  cursor: pointer;
+}
+
 .title-bar {
   display: flex;
   align-items: center;
@@ -159,6 +179,6 @@ setTimeout(() => {
 }
 
 .logo {
-  width: 48px;
+  height: 48px;
 }
 </style>

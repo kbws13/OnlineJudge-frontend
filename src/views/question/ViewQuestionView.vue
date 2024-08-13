@@ -9,13 +9,13 @@
                 :column="{ xs: 1, md: 2, lg: 3 }"
                 title="判题条件"
               >
-                <a-descriptions-item label="时间限制（ms）：">
-                  {{ question.judgeConfig?.timeLimit ?? 0 }}
+                <a-descriptions-item label="时间限制">
+                  {{ question.judgeConfig?.timeLimit ?? 0 }}ms
                 </a-descriptions-item>
-                <a-descriptions-item label="内存限制（KB）：">
-                  {{ question.judgeConfig?.memoryLimit ?? 0 }}
+                <a-descriptions-item label="内存限制">
+                  {{ question.judgeConfig?.memoryLimit ?? 0 }}kb
                 </a-descriptions-item>
-                <a-descriptions-item label="堆栈限制（KB）：">
+                <a-descriptions-item label="堆栈限制">
                   {{ question.judgeConfig?.stackLimit ?? 0 }}
                 </a-descriptions-item>
               </a-descriptions>
@@ -33,7 +33,7 @@
             </a-card>
           </a-tab-pane>
           <a-tab-pane key="comment" disabled title="评论"> 评论区</a-tab-pane>
-          <a-tab-pane key="answer" title="答案"> 提交后方可查看答案</a-tab-pane>
+          <a-tab-pane key="answer" title="答案"> 暂时无法查看答案</a-tab-pane>
         </a-tabs>
       </a-col>
       <a-col :md="12" :xs="24">
@@ -57,9 +57,7 @@
         />
         <a-divider size="0" />
         <a-button
-          shape="round"
-          size="large"
-          style="min-width: 200px; margin-left: 280px"
+          style="min-width: 200px; text-align: center;"
           type="primary"
           @click="doSubmit"
         >
@@ -113,11 +111,11 @@ const loadData = async () => {
  * 不同语言的默认程序
  */
 const codeDefaultValue = ref(
+  "import java.util.Scanner;\n" +
   "public class Main {\n" +
     "    public static void main(String[] args) {\n" +
-    "        int a = Integer.parseInt(args[0]);\n" +
-    "        int b = Integer.parseInt(args[1]);\n" +
-    "        System.out.println(a + b);\n" +
+    "        Scanner in = new Scanner(System.in);\n" +
+    "        \n" +
     "    }\n" +
     "}\n"
 );
@@ -185,11 +183,9 @@ const changeCode = (value: string) => {
 </script>
 
 <style>
-#viewQuestionsView {
-  max-width: 1600px;
+#viewQuestionView {
+  max-width: 1400px;
   margin: 0 auto;
-  box-shadow: 0px 0px 10px rgba(35, 7, 7, 0.21);
-  border-radius: 10px;
 }
 
 #viewQuestionView .arco-space-horizontal .arco-space-item {

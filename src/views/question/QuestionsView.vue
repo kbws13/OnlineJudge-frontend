@@ -48,15 +48,14 @@
         </a-space>
       </template>
       <template #acceptedRate="{ record }">
-        {{
-          `${
-            Math.round(
-              (record.submitNum > 0
-                ? (record.acceptedNum / record.submitNum) * 100
-                : "0" * 100) * 100
-            ) / 100
-          }% (${record.acceptedNum}/${record.submitNum})`
-        }}
+        <a-progress 
+          :percent="Math.round(
+            (record.submitNum > 0 
+              ? (record.acceptedNum / record.submitNum) * 10000
+              : 0)
+          ) / 10000" 
+          size="medium" 
+        />
       </template>
       <template #createTime="{ record }">
         {{ moment(record.createTime).format("YYYY-MM-DD") }}
@@ -89,6 +88,8 @@ import {
 } from "../../../backend/question";
 
 const tableRef = ref();
+
+const rate = ref(5/8);
 
 const dataList = ref([]);
 const total = ref(0);
@@ -127,11 +128,11 @@ onMounted(() => {
 });
 
 const columns = [
-  {
-    title: "题号",
-    dataIndex: "id",
-    align: "center",
-  },
+  // {
+  //   title: "题号",
+  //   dataIndex: "id",
+  //   align: "center",
+  // },
   {
     title: "题目",
     dataIndex: "title",
@@ -156,7 +157,6 @@ const columns = [
     },
   },
   {
-    title: "操作",
     slotName: "optional",
     align: "center",
   },
